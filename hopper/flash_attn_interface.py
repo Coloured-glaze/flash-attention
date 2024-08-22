@@ -14,7 +14,7 @@ import flashattn_hopper_cuda
 def maybe_contiguous(x):
     return x.contiguous() if x is not None and x.stride(-1) != 1 else x
 
-def _flash_attn_forward(q, k, v, softmax_scale, causal):
+def _flash_attn_forward(q, k, v, softmax_scale, causal, gqa_decoding=False):
     q, k, v = [maybe_contiguous(x) for x in (q, k, v)]
     out, q, k, v, out_padded, softmax_lse, S_dmask = flashattn_hopper_cuda.fwd(
         q,
@@ -23,6 +23,7 @@ def _flash_attn_forward(q, k, v, softmax_scale, causal):
         None,
         softmax_scale,
         causal,
+        gqa_decoding
     )
     return out, q, k, v, out_padded, softmax_lse, S_dmask
 
@@ -149,7 +150,7 @@ class FlashAttnFunc(torch.autograd.Function):
         v,
         softmax_scale,
         causal,
-        deterministic=False,
+        deterministic=False,        
     ):
         if softmax_scale is None:
             softmax_scale = q.shape[-1] ** (-0.5)
@@ -158,7 +159,8 @@ class FlashAttnFunc(torch.autograd.Function):
             k,
             v,
             softmax_scale,
-            causal
+            causal,            
+            True,
         )
         ctx.save_for_backward(q, k, v, out_padded, softmax_lse)
         ctx.softmax_scale = softmax_scale
@@ -262,7 +264,7 @@ def flash_attn_func(
     v,
     softmax_scale=None,
     causal=False,
-    deterministic=False
+    deterministic=False,    
 ):
     """dropout_p should be set to 0.0 during evaluation
     Supports multi-query and grouped-query attention (MQA/GQA) by passing in KV with fewer heads
@@ -318,7 +320,7 @@ def flash_attn_func(
         v,
         softmax_scale,
         causal,
-        deterministic,
+        deterministic,        
     )
 
 
