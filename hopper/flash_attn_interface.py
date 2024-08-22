@@ -159,8 +159,7 @@ class FlashAttnFunc(torch.autograd.Function):
             k,
             v,
             softmax_scale,
-            causal,            
-            True,
+            causal,                        
         )
         ctx.save_for_backward(q, k, v, out_padded, softmax_lse)
         ctx.softmax_scale = softmax_scale
