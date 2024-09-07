@@ -27,10 +27,8 @@ jobs:
           exclude:
             - torch-version: '2.1.2'
               cuda-version: '12.1.0'
-              cuda-ver: '121'
             - torch-version: '2.4.0'
               cuda-version: '11.8.0'
-              cuda-ver: '118'
     
     steps:
       - name: Checkout
