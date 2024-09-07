@@ -23,9 +23,14 @@ jobs:
           python-version: ['3.10']
           torch-version: ['2.1.2', '2.4.0']
           cuda-version: ['11.8.0', '12.1.0']
+          cuda-ver: ['118', '121']
           exclude:
+            - torch-version: '2.1.2'
+              cuda-version: '12.1.0'
+              cuda-ver: '121'
             - torch-version: '2.4.0'
               cuda-version: '11.8.0'
+              cuda-ver: '118'
     
     steps:
       - name: Checkout
@@ -43,7 +48,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install CUDA ${{ matrix.cuda-version }}
-        if: ${{ matrix.cuda-version != 'cpu' }}
+        # if: ${{ matrix.cuda-version != 'cpu' }}
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
         with:
@@ -63,7 +68,8 @@ jobs:
       - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
         run: |
           pip install setuptools==68.0.0 ninja packaging wheel
-          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ matrix.cuda-version }}
+
+          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ matrix.cuda-ver }}
           python --version
           python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
         shell:
