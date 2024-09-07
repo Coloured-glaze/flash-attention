@@ -86,7 +86,6 @@ jobs:
       - name: print wheel name
         run: echo "wheel_name ${{ env.wheel_name }}"
 
-    release:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.version }}
