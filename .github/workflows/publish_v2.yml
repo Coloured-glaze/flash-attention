@@ -2,34 +2,47 @@
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
 
-name: Build Wheel Package
+name: Build single Wheel Package
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag of build: v1.0.9'
+        description: 'Version tag or commit hash : v1.0.9'
         default: 'v1.0.9'
+        required: true
+        type: string
+      python-version:
+        description: 'python-version: 3.10'
+        default: '3.10'
+        required: true
+        type: string
+      torch-version:
+        description: 'torch-version: 2.4.0'
+        default: '2.4.0'
+        required: true
+        type: string
+      cuda-version:
+        description: 'cuda-version: 12.1.0'
+        default: '12.1.0'
+        required: true
+        type: string
+      cuda-ver:
+        description: 'cuda-ver: 121'
+        default: '121'
+        required: true
+        type: string
+      os:
+        description: 'operating-system: ubuntu-20.04'
+        default: 'ubuntu-20.04'
         required: true
         type: string
 
 jobs:
   wheel:
-    name: ${{ matrix.os }} py${{ matrix.python-version }}-pt${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-          os: [ubuntu-20.04]
-          python-version: ['3.10']
-          torch-version: ['2.1.2', '2.4.0']
-          cuda-version: ['11.8.0', '12.1.0']
-          cuda-ver: ['118', '121']
-          exclude:
-            - torch-version: '2.1.2'
-              cuda-version: '12.1.0'
-            - torch-version: '2.4.0'
-              cuda-version: '11.8.0'
-    
+    name: ${{ inputs.os }} py${{ inputs.python-version }}-pt${{ inputs.torch-version }}+cu${{ inputs.cuda-version }}
+    runs-on: ${{ inputs.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,17 +56,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ inputs.python-version }}
 
-      - name: Install CUDA ${{ matrix.cuda-version }}
-        # if: ${{ matrix.cuda-version != 'cpu' }}
+      - name: Install CUDA ${{ inputs.cuda-version }}
+        # if: ${{ inputs.cuda-version != 'cpu' }}
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
         with:
-          cuda: ${{ matrix.cuda-version }}
+          cuda: ${{ inputs.cuda-version }}
           linux-local-args: '["--toolkit"]'
           # default method is "local", and we're hitting some error with caching for CUDA 11.8 and 12.1
-          # method: ${{ (matrix.cuda-version == '11.8.0' || matrix.cuda-version == '12.1.0') && 'network' || 'local' }}
+          # method: ${{ (inputs.cuda-version == '11.8.0' || inputs.cuda-version == '12.1.0') && 'network' || 'local' }}
           method: 'network'
           # We need the cuda libraries (e.g. cuSparse, cuSolver) for compiling PyTorch extensions,
           # not just nvcc
@@ -63,11 +76,10 @@ jobs:
       - run: echo "Cuda install location ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
       - run: nvcc -V
 
-      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
+      - name: Install PyTorch ${{ inputs.torch-version }}+cu${{ inputs.cuda-ver }}
         run: |
           pip install setuptools==68.0.0 ninja packaging wheel
-
-          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ matrix.cuda-ver }}
+          pip install --no-cache-dir torch==${{ inputs.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ inputs.cuda-ver }}
           python --version
           python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
         shell:
@@ -81,7 +93,7 @@ jobs:
           export CUDA_INSTALL_DIR=/usr/local/cuda-11.3$CUDA_INSTALL_DIR
           pip install wheel
           python setup.py bdist_wheel --dist-dir=dist
-          tmpname=cu${{ matrix.cuda-version }}torch${{ matrix.torch-version }}
+          tmpname=cu${{ inputs.cuda-ver }}torch${{ inputs.torch-version }}
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} ${wheel_name}
           echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
@@ -92,7 +104,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.version }}
+          tag_name: ${{ inputs.version }}-${{ inputs.python-version }}-${{ inputs.torch-version }}-${{ inputs.cuda-ver }}
           files: |
             ${{ env.wheel_name }}
         env:
