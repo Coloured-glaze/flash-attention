@@ -31,15 +31,11 @@ jobs:
         with:
           ref: ${{ inputs.version }}
       
-      - name: Get the tag version
-        id: extract_branch
-        run: echo "branch=${{ inputs.version }}" >> $GITHUB_ENV
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ inputs.python-version }}
-
+          python-version: ${{ matrix.python-version }}
+      
       - name: Install CUDA ${{ matrix.cuda-version }}
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
@@ -63,7 +59,7 @@ jobs:
       - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ env.cuda_ver }}
         run: |
           pip install setuptools==68.0.0 ninja packaging wheel numpy
-          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ env.cuda_ver }}
+          pip install --no-cache-dir torch==${{ matrix.torch-version }}+cu${{ env.cuda_ver }} -f https://download.pytorch.org/whl/torch_stable.html -i https://pypi.org/simple
           python --version
           python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
         shell: bash
@@ -87,7 +83,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.version }}-${{ inputs.python-version }}-${{ matrix.torch-version }}-${{ env.cuda_ver }}
+          tag_name: ${{ inputs.version }}-${{ matrix.python-version }}-${{ matrix.torch-version }}-${{ env.cuda_ver }}
           files: |
             ${{ env.wheel_name }}
         env:
