@@ -1,0 +1,97 @@
+# This workflow will upload a Python Package to Release asset
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+
+name: Build Wheel Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag of llama-cpp-python to build: v1.0.9'
+        default: 'v1.0.9'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+      
+  wheel:
+    name: Build Wheel
+    runs-on: ${{ matrix.os }}
+    needs: release
+    
+    strategy:
+      fail-fast: false
+      matrix:
+          os: [ubuntu-20.04]
+          python-version: ['3.10']
+          torch-version: [2.1.2, 2.4.0]
+          cuda-version: ['118', '121']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
+      
+      - name: Get the tag version
+        id: extract_branch
+        run: echo "branch=${{ inputs.version }}" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install CUDA ${{ matrix.cuda-version }}
+        if: ${{ matrix.cuda-version != 'cpu' }}
+        uses: Jimver/cuda-toolkit@v0.2.14
+        id: cuda-toolkit
+        with:
+          cuda: ${{ matrix.cuda-version }}
+          linux-local-args: '["--toolkit"]'
+          # default method is "local", and we're hitting some error with caching for CUDA 11.8 and 12.1
+          # method: ${{ (matrix.cuda-version == '11.8.0' || matrix.cuda-version == '12.1.0') && 'network' || 'local' }}
+          method: 'network'
+          # We need the cuda libraries (e.g. cuSparse, cuSolver) for compiling PyTorch extensions,
+          # not just nvcc
+          # sub-packages: '["nvcc"]'
+
+      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
+        run: |
+          pip install setuptools==68.0.0 ninja packaging wheel
+          pip install --no-index --no-cache-dir torch==${{ matrix.torch-version }} -f https://download.pytorch.org/whl/cu${{ matrix.cuda-version }}/torch_stable.html
+          python --version
+          python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
+        shell:
+          bash
+
+      - name: Build wheel
+        run: |
+          export FORCE_CUDA="1"
+          export PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH
+          export LD_LIBRARY_PATH=/usr/local/nvidia/lib64:/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+          export CUDA_INSTALL_DIR=/usr/local/cuda-11.3$CUDA_INSTALL_DIR
+          pip install wheel
+          python setup.py bdist_wheel --dist-dir=dist
+          tmpname=cu${{ matrix.cuda-version }}torch${{ matrix.torch-version }}
+          wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
+          ls dist/*whl |xargs -I {} mv {} ${wheel_name}
+          echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
+        shell: bash
+      
+      - name: print wheel name
+        run: echo "wheel_name ${{ env.wheel_name }}"
+
+    release:
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          files: |
+            ${{ env.wheel_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
