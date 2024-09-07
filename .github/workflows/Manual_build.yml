@@ -60,10 +60,10 @@ jobs:
       - run: echo "Cuda install location ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
       - run: nvcc -V
 
-      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ env.cuda-ver }}
+      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ env.cuda_ver }}
         run: |
           pip install setuptools==68.0.0 ninja packaging wheel numpy
-          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ env.cuda-ver }}
+          pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ env.cuda_ver }}
           python --version
           python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
         shell: bash
@@ -76,7 +76,7 @@ jobs:
           export CUDA_INSTALL_DIR=/usr/local/cuda-11.3$CUDA_INSTALL_DIR
           pip install wheel
           python setup.py bdist_wheel --dist-dir=dist
-          tmpname=cu${{ env.cuda-ver }}torch${{ matrix.torch-version }}
+          tmpname=cu${{ env.cuda_ver }}torch${{ matrix.torch-version }}
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} ${wheel_name}
           echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
@@ -87,7 +87,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.version }}-${{ inputs.python-version }}-${{ matrix.torch-version }}-${{ env.cuda-ver }}
+          tag_name: ${{ inputs.version }}-${{ inputs.python-version }}-${{ matrix.torch-version }}-${{ env.cuda_ver }}
           files: |
             ${{ env.wheel_name }}
         env:
