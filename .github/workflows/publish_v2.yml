@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag of llama-cpp-python to build: v1.0.9'
+        description: 'Version tag of build: v1.0.9'
         default: 'v1.0.9'
         required: true
         type: string
