@@ -72,7 +72,7 @@ jobs:
               "python_ver" : py_version,
               "torch_ver" : torch_versions,
               "cuda_ver" : cuda_versions,
-              "cxx11_abi": CXX11_ABI,
+              "cxx11_abi": cxx11_abi,
               "include": [],
               "exclude": exclude_list,
           }
