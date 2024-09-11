@@ -72,7 +72,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: pierotofy/set-swap-space@v1.0
         with:
-          swap-size-gb: 4
+          swap-size-gb: 10
 
       - name: Install CUDA ${{ matrix.cuda-version }}
         if: ${{ matrix.cuda-version != 'cpu' }}
@@ -82,8 +82,8 @@ jobs:
           cuda: ${{ matrix.cuda-version }}
           linux-local-args: '["--toolkit"]'
           # default method is "local", and we're hitting some error with caching for CUDA 11.8 and 12.1
-          method: ${{ (matrix.cuda-version == '11.8.0' || matrix.cuda-version == '12.1.0') && 'network' || 'local' }}
-          # method: 'network'
+          # method: ${{ (matrix.cuda-version == '11.8.0' || matrix.cuda-version == '12.1.0') && 'network' || 'local' }}
+          method: 'local'
           # We need the cuda libraries (e.g. cuSparse, cuSolver) for compiling PyTorch extensions,
           # not just nvcc
           # sub-packages: '["nvcc"]'

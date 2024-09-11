@@ -81,10 +81,14 @@ jobs:
       
       - name: print wheel name
         run: echo "wheel_name ${{ env.wheel_name }}"
+      
+      - name: Get the tag version
+        id: extract_branch
+        run: echo "branch=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.version }}-${{ matrix.python-version }}-${{ matrix.torch-version }}-${{ env.cuda_ver }}
+          tag_name: ${{ steps.extract_branch.outputs.branch }}-${{inputs.version}}
           files: |
             ${{ env.wheel_name }}
         env:
