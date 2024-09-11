@@ -105,12 +105,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python_ver }}
 
       - name: Set CUDA and PyTorch versions
         run: |
-          echo "MATRIX_CUDA_VERSION=$(echo ${{ matrix.cuda-version }} | awk -F \. {'print $1 $2'})" >> $GITHUB_ENV
-          echo "MATRIX_TORCH_VERSION=$(echo ${{ matrix.torch-version }} | awk -F \. {'print $1 "." $2'})" >> $GITHUB_ENV
+          echo "MATRIX_CUDA_VERSION=$(echo ${{ matrix.cuda_ver }} | awk -F \. {'print $1 $2'})" >> $GITHUB_ENV
+          echo "MATRIX_TORCH_VERSION=$(echo ${{ matrix.torch_ver }} | awk -F \. {'print $1 "." $2'})" >> $GITHUB_ENV
 
       - name: Free up disk space
         if: ${{ runner.os == 'Linux' }}
@@ -127,21 +127,21 @@ jobs:
         with:
           swap-size-gb: 10
 
-      - name: Install CUDA ${{ matrix.cuda-version }}
-        if: ${{ matrix.cuda-version != 'cpu' }}
+      - name: Install CUDA ${{ matrix.cuda_ver }}
+        if: ${{ matrix.cuda_ver != 'cpu' }}
         uses: Jimver/cuda-toolkit@v0.2.16
         id: cuda-toolkit
         with:
-          cuda: ${{ matrix.cuda-version }}
+          cuda: ${{ matrix.cuda_ver }}
           linux-local-args: '["--toolkit"]'
           # default method is "local", and we're hitting some error with caching for CUDA 11.8 and 12.1
-          # method: ${{ (matrix.cuda-version == '11.8.0' || matrix.cuda-version == '12.1.0') && 'network' || 'local' }}
+          # method: ${{ (matrix.cuda_ver == '11.8.0' || matrix.cuda_ver == '12.1.0') && 'network' || 'local' }}
           method: 'local'
           # We need the cuda libraries (e.g. cuSparse, cuSolver) for compiling PyTorch extensions,
           # not just nvcc
           # sub-packages: '["nvcc"]'
 
-      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
+      - name: Install PyTorch ${{ matrix.torch_ver }}+cu${{ matrix.cuda_ver }}
         run: |
           pip install --upgrade pip
           # If we don't install before installing Pytorch, we get error for torch 2.0.1
@@ -158,10 +158,10 @@ jobs:
             maxv = {'2.1': 121, '2.4': 124}[env['MATRIX_TORCH_VERSION']]; \
             print(max(min(int(env['MATRIX_CUDA_VERSION']), maxv), minv))" \
           )
-          if [[ ${{ matrix.torch-version }} == *"dev"* ]]; then
-            pip install --no-cache-dir --pre torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}
+          if [[ ${{ matrix.torch_ver }} == *"dev"* ]]; then
+            pip install --no-cache-dir --pre torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}
           else
-            pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${TORCH_CUDA_VERSION}
+            pip install --no-cache-dir torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/cu${TORCH_CUDA_VERSION}
           fi
           nvcc --version
           python --version
