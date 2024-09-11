@@ -2,7 +2,7 @@
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
 
-name: Manual Build Wheel Package
+name: Manual Build FA 1 Wheel Package
 
 on:
   workflow_dispatch:
@@ -62,7 +62,7 @@ jobs:
           pip install setuptools==68.0.0 ninja packaging wheel numpy
           pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${{ env.cuda_ver }}
           python --version
-          python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
+          python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); from torch.utils import cpp_extension; print(cpp_extension.CUDA_HOME)"
         shell: bash
 
       - name: Build wheel
