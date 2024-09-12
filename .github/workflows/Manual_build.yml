@@ -2,7 +2,7 @@
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
 
-name: Manual Build FA 1 Wheel Package
+name: Manual build FA 1 wheel package
 
 on:
   workflow_dispatch:

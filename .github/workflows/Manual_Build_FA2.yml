@@ -195,13 +195,25 @@ jobs:
           ls -lh dist
           echo "wheel_name ${{ env.wheel_name }}"
       
-      - name: Get the tag version
-        id: extract_branch
-        run: echo "branch=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+      - name: Get the date
+        id: date
+        run: |
+          tag=$(date +"v%Y-%m-%d-%H-%M")
+          echo "Generated release tag: $tag"
+          echo "release_tag=${tag}" >> "$GITHUB_OUTPUT"
+        # Format date as vYYYY-MM-DD-HH-MM
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
+          retention-days: 30
+          path: |
+            ${{ env.wheel_name }}
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.extract_branch.outputs.branch }}-${{inputs.version}}
+          tag_name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
           files: |
             ${{ env.wheel_name }}
         env:
