@@ -207,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
-          retention-days: 30
+          retention-days: 14
           path: |
             ${{ env.wheel_name }}
 
