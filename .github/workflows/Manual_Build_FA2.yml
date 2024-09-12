@@ -22,12 +22,12 @@ on:
         type: string
       torch_version:
         description: 'torch_version: multiple versions separated by ;'
-        default: '2.4.0'
+        default: '2.4.1'
         required: true
         type: string
       cuda_version:
         description: 'cuda_version: multiple versions separated by ;'
-        default: '12.1.0;12.4.0'
+        default: '12.4.0'
         required: true
         type: string
       cxx11_abi:
