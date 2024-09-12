@@ -188,17 +188,22 @@ jobs:
           tmpname=cu${MATRIX_CUDA_VERSION}torch${MATRIX_TORCH_VERSION}cxx11abi${{ matrix.cxx11_abi }}
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} dist/${wheel_name}
-          echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
+          echo "wheel_name=${{ github.workspace }}/dist/${wheel_name}" >> $GITHUB_ENV
 
-      - name: print wheel name
+      - name: print wheel path
+        id: wheel_path
         run: |
           ls -lh dist
-          echo "wheel_name ${{ env.wheel_name }}"
-      
+          wheel_path=$(find ${{ github.workspace }}/dist/ -name "flash_attn*.whl")
+          echo "wheel_path=$wheel_path" >> "$GITHUB_OUTPUT"
+          echo "wheel_path: $wheel_path"
+          echo "wheel_name: ${{ env.wheel_name }}"
+        shell: bash
+
       - name: Get the date
         id: date
         run: |
-          tag=$(date +"v%Y-%m-%d-%H-%M")
+          tag=$(date +"%Y-%m-%d-%H-%M")
           echo "Generated release tag: $tag"
           echo "release_tag=${tag}" >> "$GITHUB_OUTPUT"
         # Format date as vYYYY-MM-DD-HH-MM
@@ -215,6 +220,6 @@ jobs:
         with:
           tag_name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
           files: |
-            ${{ env.wheel_name }}
+            ${{  steps.wheel_path.outputs.wheel_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
