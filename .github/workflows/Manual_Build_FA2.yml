@@ -241,7 +241,7 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
+          name: ${{inputs.version}}-${{ github.job }}-${{ steps.date.outputs.release_tag }}_${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ env.wheel_name }}
