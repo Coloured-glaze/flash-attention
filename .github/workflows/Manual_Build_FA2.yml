@@ -73,14 +73,15 @@ jobs:
               result = []
               for pair in text:
                   items = pair.split(',')
-                  temp = [None, None]
-                  for item in items:
-                      key, value = item.split('=')
-                      if key == 'th':
-                          temp[0] = value
-                      elif key == 'cu':
-                          temp[1] = value
-                  result.append(temp)
+                  if len(items) == 2:
+                      temp = [None, None]
+                      for item in items:
+                          key, value = item.split('=')
+                          if key == 'th':
+                              temp[0] = value
+                          elif key == 'cu':
+                              temp[1] = value
+                      result.append(temp)
               return result
           exclude_text_list = split_text(exclude_text)
 
