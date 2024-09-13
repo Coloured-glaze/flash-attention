@@ -223,7 +223,7 @@ jobs:
         id: wheel_path
         run: |
           ls -lh dist
-          wheel_path=$(find ${{ github.workspace }}/dist/ -name "flash_attn*.whl")
+          wheel_path=$(find ${{ github.workspace }}/dist/ -name "*.whl")
           echo "wheel_path=$wheel_path" >> "$GITHUB_OUTPUT"
           echo "wheel_path: $wheel_path"
           echo "wheel_name: ${{ env.wheel_name }}"
