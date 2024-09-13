@@ -171,32 +171,24 @@ jobs:
         id: wheel_path
         run: |
           ls -lh dist
-          wheel_path=$(find ${{ github.workspace }}/dist/ -name "*.whl")
+          wheel_path=$(find ${{ github.workspace }} -name "*.whl")
           echo "wheel_path=$wheel_path" >> "$GITHUB_OUTPUT"
           echo "wheel_path: $wheel_path"
           echo "wheel_name: ${{ env.wheel_name }}"
         shell: bash
 
-      - name: Get the date
-        id: date
-        run: |
-          tag=$(date +"%Y-%m-%d-%H-%M")
-          echo "Generated release tag: $tag"
-          echo "release_tag=${tag}" >> "$GITHUB_OUTPUT"
-        # Format date as vYYYY-MM-DD-HH-MM
-
       - name: Upload artifact
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.version}}-${{ github.job }}-${{ steps.date.outputs.release_tag }}_${{ github.run_id }}
+          name: ${{inputs.version}}-${{ github.job }}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ env.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.version}}-${{ steps.date.outputs.release_tag }}
+          tag_name: ${{inputs.version}}-${{ github.job }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
