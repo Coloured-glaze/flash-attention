@@ -233,14 +233,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.version}}-${{ github.job }}-${{ github.run_id }}
+          name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ env.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.version}}-${{ github.job }}
+          tag_name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
