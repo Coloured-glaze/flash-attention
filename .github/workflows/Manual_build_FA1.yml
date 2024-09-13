@@ -165,13 +165,13 @@ jobs:
           tmpname=cu${{ env.cuda_ver }}torch${{ matrix.torch_ver }}
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} ${wheel_name}
-          echo "wheel_name=${{ github.workspace }}/dist/${wheel_name}" >> $GITHUB_ENV
+          echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
 
       - name: Print wheel path
         id: wheel_path
         run: |
           ls -lh dist
-          wheel_path=$(find ${{ github.workspace }} -name "*.whl")
+          wheel_path=$(find ${{ github.workspace }}/dist/ -name "*.whl")
           echo "wheel_path=$wheel_path" >> "$GITHUB_OUTPUT"
           echo "wheel_path: $wheel_path"
           echo "wheel_name: ${{ env.wheel_name }}"
@@ -181,14 +181,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.version}}-${{ github.job }}-${{ github.run_id }}
+          name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ env.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.version}}-${{ github.job }}
+          tag_name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
