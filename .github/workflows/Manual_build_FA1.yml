@@ -132,6 +132,7 @@ jobs:
           # "local" or "network" 
 
       - name: Format CUDA version
+        id: fmt_cuda_ver
         run: |
           cuda_ver=$(echo ${{ matrix.cuda_ver }} | sed -E 's/([0-9]+)\.([0-9]+)\.[0-9]+/\1\2/g' ) 
           echo "Format CUDA version is ${cuda_ver}"
@@ -155,6 +156,7 @@ jobs:
         shell: bash
 
       - name: Build wheel
+        id: build_wheel
         run: |
           export FORCE_CUDA="1"
           export PATH=/usr/local/nvidia/bin:/usr/local/nvidia/lib64:$PATH
@@ -171,7 +173,7 @@ jobs:
         id: wheel_path
         run: |
           ls -lh dist
-          wheel_path=$(find ${{ github.workspace }}/dist/ -name "*.whl")
+          wheel_path=$(find ${{ github.workspace }} -name "*.whl")
           echo "wheel_path=$wheel_path" >> "$GITHUB_OUTPUT"
           echo "wheel_path: $wheel_path"
           echo "wheel_name: ${{ env.wheel_name }}"
@@ -184,7 +186,7 @@ jobs:
           name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
           retention-days: 14
           path: |
-            ${{ env.wheel_name }}
+            ${{ steps.build_wheel.outputs.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
