@@ -195,9 +195,10 @@ jobs:
           gcc --version
           nvcc --version
           python --version
-          python -c "import torch; print('PyTorch:', torch.__version__)"
-          python -c "import torch; print('CUDA:', torch.version.cuda)"
-          python -c "from torch.utils import cpp_extension; print (cpp_extension.CUDA_HOME)"
+          python -c "import torch; from torch.utils import cpp_extension; \
+          print('PyTorch:', torch.__version__); \
+          print('CUDA:', torch.version.cuda); \
+          print('CUDA_HOME:', cpp_extension.CUDA_HOME)"
         shell:
           bash
 
