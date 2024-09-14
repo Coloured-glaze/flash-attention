@@ -27,7 +27,7 @@ on:
         type: string
       cuda_version:
         description: 'cuda_version: multiple versions separated by ;'
-        default: '12.1.0;12.4.0'
+        default: '12.1.0;12.4.1'
         required: true
         type: string
       cxx11_abi:

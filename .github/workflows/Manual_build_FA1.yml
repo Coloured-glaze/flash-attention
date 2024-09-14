@@ -128,8 +128,8 @@ jobs:
         with:
           cuda: ${{ matrix.cuda_ver }}
           linux-local-args: '["--toolkit"]'
-          method: ${{ (matrix.cuda_ver == '11.8.0' || matrix.cuda_ver == '12.1.0') && 'network' || 'local' }}
-          # "local" or "network" 
+          # method: ${{ (matrix.cuda_ver == '11.8.0' || matrix.cuda_ver == '12.1.0') && 'network' || 'local' }}
+          method: 'network'
 
       - name: Format CUDA version
         id: fmt_cuda_ver
