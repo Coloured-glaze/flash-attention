@@ -22,7 +22,7 @@ on:
         type: string
       torch_version:
         description: 'torch_version: multiple versions separated by ;'
-        default: '2.4.0;2.4.1'
+        default: '2.3.1;2.4.1'
         required: true
         type: string
       cuda_version:
@@ -37,7 +37,7 @@ on:
         type: string
       exclude_list:
         description: 'exclude_list: multiple versions separated by ;'
-        default: 'th=2.1.2,cu=12.1.0;th=2.4.0,cu=11.8.0'
+        default: 'th=2.3.1,cu=12.4.1;th=2.4.0,cu=11.8.0'
         required: true
         type: string
       os_version:
@@ -49,6 +49,11 @@ on:
         description: 'upload artifact: 0 or 1'
         default: '0'
         required: true
+        type: string
+      addl_info:
+        description: 'additional information'
+        default: ''
+        required: false
         type: string
       
 jobs:
@@ -199,8 +204,7 @@ jobs:
           print('PyTorch:', torch.__version__); \
           print('CUDA:', torch.version.cuda); \
           print('CUDA_HOME:', cpp_extension.CUDA_HOME)"
-        shell:
-          bash
+        shell: bash
 
       - name: Build wheel
         id: build_wheel
@@ -219,6 +223,7 @@ jobs:
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} dist/${wheel_name}
           echo "wheel_name=${{ github.workspace }}/dist/${wheel_name}" >> $GITHUB_ENV
+        shell: bash
 
       - name: Print wheel path
         id: wheel_path
@@ -234,14 +239,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
+          name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ steps.build_wheel.outputs.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}
+          tag_name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:

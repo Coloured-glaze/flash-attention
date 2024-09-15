@@ -61,7 +61,7 @@ FORCE_BUILD = os.getenv("FLASH_ATTENTION_FORCE_BUILD", "FALSE") == "TRUE"
 SKIP_CUDA_BUILD = os.getenv("FLASH_ATTENTION_SKIP_CUDA_BUILD", "FALSE") == "TRUE"
 # For CI, we want the option to build with C++11 ABI since the nvcr images use C++11 ABI
 FORCE_CXX11_ABI = os.getenv("FLASH_ATTENTION_FORCE_CXX11_ABI", "FALSE") == "TRUE"
-print(f"FORCE_BUILD: {FORCE_BUILD}, SKIP_CUDA_BUILD: {SKIP_CUDA_BUILD}, FORCE_CXX11_ABI: {FORCE_CXX11_ABI}")
+print(f"====== FORCE_BUILD: {FORCE_BUILD}, SKIP_CUDA_BUILD: {SKIP_CUDA_BUILD}, FORCE_CXX11_ABI: {FORCE_CXX11_ABI} ======")
 
 def get_platform():
     """
