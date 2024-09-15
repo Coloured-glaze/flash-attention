@@ -32,12 +32,12 @@ on:
         type: string
       cxx11_abi:
         description: 'cxx11_abi: multiple options: TRUE, FALSE, separated by ;'
-        default: 'TRUE'
+        default: 'TRUE;FALSE'
         required: true
         type: string
       exclude_list:
         description: 'exclude_list: multiple versions separated by ;'
-        default: 'th=2.3.1,cu=12.4.1;th=2.4.0,cu=11.8.0'
+        default: 'th=2.3.1,cu=12.4.1;th=2.4.1,cu=12.1.0'
         required: true
         type: string
       os_version:
