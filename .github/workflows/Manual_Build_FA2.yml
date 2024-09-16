@@ -41,8 +41,8 @@ on:
         required: true
         type: string
       os_version:
-        description: 'os_version: ubuntu-latest, ubuntu-24.04, ubuntu-20.04'
-        default: 'ubuntu-20.04'
+        description: 'os_version: ubuntu-latest, ubuntu-24.04, ubuntu-22.04, ubuntu-20.04'
+        default: 'ubuntu-22.04'
         required: true
         type: string
       upload_artifact:
@@ -239,14 +239,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ github.run_id }}
+          name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{matrix.os_version}}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ steps.build_wheel.outputs.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}
+          tag_name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{matrix.os_version}}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
