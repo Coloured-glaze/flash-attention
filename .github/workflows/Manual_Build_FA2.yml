@@ -130,6 +130,11 @@ jobs:
       matrix: ${{ fromJSON(needs.set_ver.outputs.matrix) }}
 
     steps:
+      - name: Print release tag
+        run: |
+          echo ${{ inputs.addl_info }}${{ inputs.version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{matrix.os_version}}
+        shell: bash
+      
       - name: Checkout
         uses: actions/checkout@v4.1.7
         with:
