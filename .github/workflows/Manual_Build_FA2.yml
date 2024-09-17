@@ -132,7 +132,7 @@ jobs:
     steps:
       - name: Print release tag
         run: |
-          echo ${{ inputs.addl_info }}${{ inputs.version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{matrix.os_version}}
+          echo ${{ inputs.addl_info }}${{ inputs.version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{ inputs.os_version }}
         shell: bash
       
       - name: Checkout
@@ -251,7 +251,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{inputs.addl_info}}${{inputs.version}}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{matrix.os_version}}
+          tag_name: ${{ inputs.addl_info }}${{ inputs.version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{  matrix.cuda_ver }}-${{ inputs.os_version }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
