@@ -46,7 +46,7 @@ on:
         required: true
         type: string
       max_jobs:
-        description: 'upload artifact: 1 or 2'
+        description: 'max jobs 1 or 2'
         default: '1'
         required: true
         type: string
