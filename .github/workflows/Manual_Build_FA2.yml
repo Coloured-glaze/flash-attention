@@ -55,7 +55,10 @@ on:
         default: ''
         required: false
         type: string
-      
+
+permissions:
+  contents: write
+
 jobs:
   set_ver:
     runs-on: ubuntu-latest
@@ -74,14 +77,14 @@ jobs:
         run: |
           case "${{ inputs.version }}" in
             commit)
-              version="$(git rev-parse --short HEAD)-${{ inputs.postgresql_version }}"
+              version="$(git rev-parse --short HEAD)"
               ;;
             tag)
-              version="git-$(git describe --tags --abbrev=0)-${{ inputs.postgresql_version }}"
+              version="git-$(git describe --tags --abbrev=0)"
               ;;
             version)
               if [ -f VERSION ]; then
-                version=$(cat VERSION)-${{ inputs.postgresql_version }}
+                version=$(cat VERSION)
               else
                 version="${{ inputs.version }}"
               fi
