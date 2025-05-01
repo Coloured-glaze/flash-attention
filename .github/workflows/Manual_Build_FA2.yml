@@ -62,7 +62,13 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-    
+      
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+        # with:
+        #   ref: ${{ steps.determine_version.outputs.d_ver }}
+        #   submodules: false    
+
       - name: Determine version
         id: determine_version
         run: |
@@ -84,7 +90,7 @@ jobs:
               version="${{ inputs.version }}"
               ;;
           esac
-          echo "determined_version=$version" >> $GITHUB_OUTPUT
+          echo "d_ver=$version" >> $GITHUB_OUTPUT
 
       - name: Set matrix
         id: set-matrix
@@ -156,14 +162,8 @@ jobs:
     steps:
       - name: Print release tag
         run: |
-          echo ${{ inputs.addl_info }}${{ inputs.version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
+          echo ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
         shell: bash
-      
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-        with:
-          ref: ${{ inputs.version }}
-          submodules: false
 
       - name: Set up Python
         uses: actions/setup-python@v5.2.0
@@ -272,14 +272,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.addl_info}}-${{ steps.determine_version.outputs.determined_version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{matrix.os_version}}-${{ github.run_id }}
+          name: ${{inputs.addl_info}}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{matrix.os_version}}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ steps.build_wheel.outputs.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.determined_version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
+          tag_name: ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
