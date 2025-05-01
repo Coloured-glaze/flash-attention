@@ -55,11 +55,6 @@ on:
         default: '0'
         required: true
         type: string
-      swap_size:
-        description: 'swap size: GB '
-        default: '16'
-        required: true
-        type: string
       addl_info:
         description: 'additional information'
         default: ''
@@ -182,7 +177,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: pierotofy/set-swap-space@v1.0
         with:
-          swap-size-gb: ${{ inputs.swap_size }}
+          swap-size-gb: 16
           
       - name: Set CUDA and PyTorch versions
         run: |
