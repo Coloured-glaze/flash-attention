@@ -66,7 +66,6 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
 
-
       - name: Set matrix
         id: set-matrix
         run: |
@@ -166,7 +165,7 @@ jobs:
           
       - name: Print release tag
         run: |
-          echo ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
+          echo ${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}-${{ inputs.addl_info }}
         shell: bash
 
       - name: Set up Python
@@ -180,6 +179,10 @@ jobs:
           echo "MATRIX_TORCH_VERSION=$(echo ${{ matrix.torch_ver }} | awk -F \. {'print $1 "." $2'})" >> $GITHUB_ENV
           echo "WHEEL_CUDA_VERSION=$(echo ${{ matrix.cuda_ver }} | awk -F \. {'print $1'})" >> $GITHUB_ENV
           echo "MATRIX_PYTHON_VERSION=$(echo ${{ matrix.python_ver }} | awk -F \. {'print $1 $2'})" >> $GITHUB_ENV
+          echo "${{ env.MATRIX_CUDA_VERSION }} 
+          echo "${{ env.MATRIX_TORCH_VERSION }} 
+          echo "${{ env.MATRIX_PYTHON_VERSION }}"
+          echo "${{ env.WHEEL_CUDA_VERSION }}"
 
       - name: Free up disk space
         if: ${{ runner.os == 'Linux' }}
@@ -210,7 +213,7 @@ jobs:
           # not just nvcc
           sub-packages: '["nvcc"]'
 
-      - name: Install PyTorch ${{ matrix.torch-version }}+cu${{ matrix.cuda-version }}
+      - name: Install PyTorch ${{ matrix.torch_ver }}+cu${{ matrix.cuda_ver }}
         run: |
           pip install --upgrade pip
           # With python 3.13 and torch 2.5.1, unless we update typing-extensions, we get error
@@ -225,15 +228,15 @@ jobs:
             maxv = {'2.4': 124, '2.5': 124, '2.6': 126, '2.7': 128}[env['MATRIX_TORCH_VERSION']]; \
             print(minv if int(env['MATRIX_CUDA_VERSION']) < 120 else maxv)" \
           )
-          if [[ ${{ matrix.torch-version }} == *"dev"* ]]; then
-            # pip install --no-cache-dir --pre torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}
+          if [[ ${{ matrix.torch_ver }} == *"dev"* ]]; then
+            # pip install --no-cache-dir --pre torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}
             # Can't use --no-deps because we need cudnn etc.
             # Hard-coding this version of pytorch-triton for torch 2.6.0.dev20241001
             pip install jinja2
             pip install https://download.pytorch.org/whl/nightly/pytorch_triton-3.1.0%2Bcf34004b8a-cp${MATRIX_PYTHON_VERSION}-cp${MATRIX_PYTHON_VERSION}-linux_x86_64.whl
-            pip install --no-cache-dir --pre https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}/torch-${{ matrix.torch-version }}%2Bcu${TORCH_CUDA_VERSION}-cp${MATRIX_PYTHON_VERSION}-cp${MATRIX_PYTHON_VERSION}-linux_x86_64.whl
+            pip install --no-cache-dir --pre https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}/torch-${{ matrix.torch_ver }}%2Bcu${TORCH_CUDA_VERSION}-cp${MATRIX_PYTHON_VERSION}-cp${MATRIX_PYTHON_VERSION}-linux_x86_64.whl
           else
-            pip install --no-cache-dir torch==${{ matrix.torch-version }} --index-url https://download.pytorch.org/whl/cu${TORCH_CUDA_VERSION}
+            pip install --no-cache-dir torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/cu${TORCH_CUDA_VERSION}
           fi
           gcc --version
           nvcc --version && python --version
@@ -256,7 +259,7 @@ jobs:
           # Limit MAX_JOBS otherwise the github runner goes OOM
           # nvcc 11.8 can compile with 2 jobs, but nvcc 12.3 goes OOM
           MAX_JOBS=$([[ "$MATRIX_CUDA_VERSION" == "128" ]] && echo 1 || echo 2) FLASH_ATTENTION_FORCE_BUILD="TRUE" FLASH_ATTENTION_FORCE_CXX11_ABI=${{ matrix.cxx11_abi}} python setup.py bdist_wheel --dist-dir=dist
-          tmpname=cu${WHEEL_CUDA_VERSION}torch${MATRIX_TORCH_VERSION}cxx11abi${{ matrix.cxx11_abi }}
+          tmpname=cu${ WHEEL_CUDA_VERSION }torch${ MATRIX_TORCH_VERSION }cxx11abi${{ matrix.cxx11_abi }}
           get_wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} dist/${get_wheel_name}
           echo "wheel_name=${{ github.workspace }}/dist/${get_wheel_name}" >> $GITHUB_ENV
@@ -276,14 +279,14 @@ jobs:
         if: ${{ inputs.upload_artifact == '1' }}
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: ${{inputs.addl_info}}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{matrix.os_version}}-${{ github.run_id }}
+          name: ${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{matrix.os_version}}-${{ inputs.addl_info }}-${{ github.run_id }}
           retention-days: 14
           path: |
             ${{ steps.build_wheel.outputs.wheel_name }}
 
       - uses: softprops/action-gh-release@v2.0.8
         with:
-          tag_name: ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
+          tag_name: ${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}-${{ inputs.addl_info }}
           files: |
             ${{  steps.wheel_path.outputs.wheel_path }}
         env:
