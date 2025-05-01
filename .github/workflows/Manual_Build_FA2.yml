@@ -65,35 +65,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      
-      - name: Checkout
-        uses: actions/checkout@v4.1.7
-        # with:
-        #   ref: ${{ steps.determine_version.outputs.d_ver }}
-        #   submodules: false    
 
-      - name: Determine version
-        id: determine_version
-        run: |
-          case "${{ inputs.version }}" in
-            commit)
-              version="$(git rev-parse --short HEAD)"
-              ;;
-            tag)
-              version="git-$(git describe --tags --abbrev=0)"
-              ;;
-            version)
-              if [ -f VERSION ]; then
-                version=$(cat VERSION)
-              else
-                version="${{ inputs.version }}"
-              fi
-              ;;
-            *)
-              version="${{ inputs.version }}"
-              ;;
-          esac
-          echo "d_ver=$version" >> $GITHUB_OUTPUT
 
       - name: Set matrix
         id: set-matrix
@@ -161,8 +133,37 @@ jobs:
 
     strategy:
       matrix: ${{ fromJSON(needs.set_ver.outputs.matrix) }}
-
     steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4.1.7
+        # with:
+        #   ref: ${{ steps.determine_version.outputs.d_ver }}
+        #   submodules: false    
+
+      - name: Determine version
+        id: determine_version
+        run: |
+          case "${{ inputs.version }}" in
+            commit)
+              version="$(git rev-parse --short HEAD)"
+              ;;
+            tag)
+              version="git-$(git describe --tags --abbrev=0)"
+              ;;
+            version)
+              if [ -f VERSION ]; then
+                version=$(cat VERSION)
+              else
+                version="${{ inputs.version }}"
+              fi
+              ;;
+            *)
+              version="${{ inputs.version }}"
+              ;;
+          esac
+          echo "d_ver=$version" >> $GITHUB_OUTPUT
+          
       - name: Print release tag
         run: |
           echo ${{ inputs.addl_info }}-${{ steps.determine_version.outputs.d_ver }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}-${{ inputs.os_version }}
