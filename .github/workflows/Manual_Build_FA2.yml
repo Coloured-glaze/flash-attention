@@ -55,6 +55,11 @@ on:
         default: '0'
         required: true
         type: string
+      swap_size:
+        description: 'swap size: GB '
+        default: '16'
+        required: true
+        type: string
       addl_info:
         description: 'additional information'
         default: ''
@@ -173,6 +178,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_ver }}
 
+      - name: Set up swap space
+        if: runner.os == 'Linux'
+        uses: pierotofy/set-swap-space@v1.0
+        with:
+          swap-size-gb: ${{ inputs.swap_size }}
+          
       - name: Set CUDA and PyTorch versions
         run: |
           echo "MATRIX_CUDA_VERSION=$(echo ${{ matrix.cuda_ver }} | awk -F \. {'print $1 $2'})" >> $GITHUB_ENV
@@ -198,12 +209,6 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
-
-      - name: Set up swap space
-        if: runner.os == 'Linux'
-        uses: pierotofy/set-swap-space@v1.0
-        with:
-          swap-size-gb: 10
 
       - name: Install CUDA ${{ matrix.cuda_ver }}
         if: ${{ matrix.cuda_ver != 'cpu' }}
