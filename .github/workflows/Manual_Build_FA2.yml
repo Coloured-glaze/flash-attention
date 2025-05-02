@@ -244,12 +244,12 @@ jobs:
             # pip install --no-cache-dir --pre torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}
             # Can't use --no-deps because we need cudnn etc.
             # Hard-coding this version of pytorch-triton for torch 2.6.0.dev20241001
-            pip install jinja2 numpy==1
+            pip install jinja2 numpy==1.26.3
             pip install https://download.pytorch.org/whl/nightly/pytorch_triton-3.1.0%2Bcf34004b8a-cp${MATRIX_PYTHON_VERSION}-cp${MATRIX_PYTHON_VERSION}-linux_x86_64.whl
             pip install --no-cache-dir --pre \
                 https://download.pytorch.org/whl/nightly/cu${TORCH_CUDA_VERSION}/torch-${{ matrix.torch_ver }}%2Bcu${TORCH_CUDA_VERSION}-cp${MATRIX_PYTHON_VERSION}-cp${MATRIX_PYTHON_VERSION}-linux_x86_64.whl
           else
-            pip install --no-cache-dir numpy==1 \
+            pip install --no-cache-dir numpy==1.26.3 \
                 torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/cu${TORCH_CUDA_VERSION}
           fi
           gcc --version
