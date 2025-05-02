@@ -82,7 +82,8 @@ jobs:
           cxx11_abi = os.getenv("CXX11_ABI").split(";")
           exclude_text = os.getenv("EXCLUDE_TEXT").split(';')
           exclude_list = []; exclude_text_list= []
-
+          max_jobs = os.getenv("MAX_JOBS")
+          
           def split_text(text):
               result = []
               for pair in text:
@@ -110,6 +111,7 @@ jobs:
                                       "cuda_ver": cuda_v,
                                       "cxx11_abi": abi
                               })
+          swap_size = if max_jobs == 1 : 16 else 32 
           matrix = {
               "python_ver" : py_version,
               "torch_ver" : torch_versions,
@@ -117,6 +119,7 @@ jobs:
               "cxx11_abi": cxx11_abi,
               "include": [],
               "exclude": exclude_list,
+              "swap_size" : swap_size, 
           }
           with open(os.getenv('GITHUB_OUTPUT'), 'a') as f:
               f.write(f"matrix={json.dumps(matrix)}\n")
@@ -129,6 +132,7 @@ jobs:
           CUDA_VERSION: ${{ inputs.cuda_version }}
           CXX11_ABI: ${{ inputs.cxx11_abi }}
           EXCLUDE_TEXT: ${{ inputs.exclude_list }}
+          MAX_JOBS: ${{ inputs.max_jobs }}
         
   wheel:
     name: ${{ inputs.os_version }}-py${{ matrix.python_ver }}-th${{ matrix.torch_ver }}-cu${{ matrix.cuda_ver }}
@@ -177,7 +181,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: pierotofy/set-swap-space@v1.0
         with:
-          swap-size-gb: 16
+          swap-size-gb: ${{ matrix.swap_size }}
           
       - name: Set CUDA and PyTorch versions
         run: |
