@@ -47,7 +47,7 @@ on:
         type: string
       max_jobs:
         description: 'max jobs'
-        default: '2'
+        default: '1'
         required: true
         type: string
       upload_artifact:
@@ -112,8 +112,7 @@ jobs:
                                       "cxx11_abi": abi
                               })
           swap_size = []
-          for _ in range(len(torch_versions)): 
-              swap_size.append("16" if max_jobs == 1 else "32")
+          for _ in range(len(torch_versions)): swap_size.append("32")
           matrix = {
               "python_ver" : py_version,
               "torch_ver" : torch_versions,
