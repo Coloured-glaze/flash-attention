@@ -126,13 +126,13 @@ jobs:
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo apt clean
 
       - name: Print disk space
         id: disk_space
         run: |
-          free -g && df -h && df -h . && sudo apt clean
+          free -g && df -h && df -h . 
           echo "github.workspace path " ${{ github.workspace }}
-          sudo echo 1 >> /mnt/1.txt
         shell: bash
       
       - name: Set up Python
