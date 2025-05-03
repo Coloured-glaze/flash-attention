@@ -144,11 +144,13 @@ jobs:
         run: |
           echo "Installed cuda version is ${{steps.cuda-toolkit.outputs.cuda}}"
           echo "Cuda install location ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
-          nvcc -V
+          nvcc -V && gcc --version
+          free -g && df -h
+        
       - name: Install PyTorch ${{ matrix.torch_ver }}+cu${{ env.cuda_ver }}
         run: |
           pip config set global.index-url https://pypi.org/simple
-          pip install setuptools==68.0.0 ninja packaging wheel numpy
+          pip install --no-cache-dir setuptools==68.0.0 ninja packaging wheel numpy
           pip install --no-cache-dir torch==${{ matrix.torch_ver }} --index-url https://download.pytorch.org/whl/cu${{ env.cuda_ver }}
           python --version
           python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA:', torch.version.cuda); \
@@ -168,6 +170,7 @@ jobs:
           wheel_name=$(ls dist/*whl | xargs -n 1 basename | sed "s/-/+$tmpname-/2")
           ls dist/*whl |xargs -I {} mv {} ${wheel_name}
           echo "wheel_name=${wheel_name}" >> $GITHUB_ENV
+      
       - name: Print wheel path
         id: wheel_path
         run: |
