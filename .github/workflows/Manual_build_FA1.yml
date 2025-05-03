@@ -118,11 +118,21 @@ jobs:
         with:
           ref: ${{ inputs.version }}
 
+      - name: Free up disk space
+        if: ${{ runner.os == 'Linux' }}
+        # https://github.com/easimon/maximize-build-space/blob/master/action.yml
+        # https://github.com/easimon/maximize-build-space/tree/test-report
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+
       - name: Print disk space
         id: disk_space
         run: |
-          free -g && df -h && ls -lh
+          free -g && df -h && df -h . && sudo apt clean
           echo "github.workspace path " ${{ github.workspace }}
+          sudo echo 1 >> /mnt/1.txt
         shell: bash
       
       - name: Set up Python
@@ -145,6 +155,8 @@ jobs:
           cuda_ver=$(echo ${{ matrix.cuda_ver }} | sed -E 's/([0-9]+)\.([0-9]+)\.[0-9]+/\1\2/g' ) 
           echo "Format CUDA version is ${cuda_ver}"
           echo "cuda_ver=${cuda_ver}" >> $GITHUB_ENV
+          free -g && df -h && df -h . && sudo apt clean
+          pip -V 
         shell: bash
 
       - name: Print CUDA version and path
